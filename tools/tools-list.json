@@ -1,0 +1,778 @@
+[
+ {
+  "name": "check_resume",
+  "title": "Check a resume",
+  "description": "Score a resume from 0 to 100 with ATSPrep's fixed rules and list each issue with a stable code, where it is and how to fix it. Also reports how the text parsed (roles, experience and project bullets, education, skills and skill groups, input and scored word counts, with definitions). Role-specific advice, such as seniority signals, is given only when the resume names a target title or you pass target_role or job_description; with job_description it also returns a keyword match summary. Resume up to 30,000 characters. Rules version 2026-10-18.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "resume_text": {
+     "type": "string",
+     "maxLength": 30000,
+     "description": "The whole resume as plain text, one heading, role or bullet per line."
+    },
+    "target_role": {
+     "description": "Optional. The job title the candidate is applying for.",
+     "type": "string",
+     "maxLength": 120
+    },
+    "job_description": {
+     "type": "string",
+     "minLength": 120,
+     "maxLength": 20000,
+     "description": "The full job posting as plain text, including its requirements (120–20,000 characters). For a link, call fetch_job_post first."
+    }
+   },
+   "required": [
+    "resume_text"
+   ]
+  },
+  "annotations": {
+   "title": "Check a resume",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "match_job",
+  "title": "Match a resume to a job",
+  "description": "Compare a resume with a job posting: the posting's keywords found in the resume (with how they matched: exact, normalized, alias or stem, and the matched span), the ones missing with the posting sentence they come from, each term's weight and whether the posting lists it as required or preferred, and weighted overall, required and preferred coverage. Posting 120–20,000 characters. Rules version 2026-10-18.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "resume_text": {
+     "type": "string",
+     "maxLength": 30000,
+     "description": "The whole resume as plain text, one heading, role or bullet per line."
+    },
+    "job_description": {
+     "type": "string",
+     "minLength": 120,
+     "maxLength": 20000,
+     "description": "The full job posting as plain text, including its requirements (120–20,000 characters). For a link, call fetch_job_post first."
+    }
+   },
+   "required": [
+    "resume_text",
+    "job_description"
+   ]
+  },
+  "annotations": {
+   "title": "Match a resume to a job",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "check_bullets",
+  "title": "Check resume bullets",
+  "description": "Give each resume bullet a score, a verdict and specific fixes with stable codes: weak openers, missing scale or result, numbers that show neither, hard-to-believe claims, first person, vague claims. The same rules and severities as check_resume. Up to 30 bullets of up to 600 characters each; blank items are skipped and reported by index. Rules version 2026-10-18.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "bullets": {
+     "minItems": 1,
+     "maxItems": 30,
+     "type": "array",
+     "items": {
+      "type": "string",
+      "maxLength": 600
+     },
+     "description": "One resume bullet per item, at most 30."
+    }
+   },
+   "required": [
+    "bullets"
+   ]
+  },
+  "annotations": {
+   "title": "Check resume bullets",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "open_in_studio",
+  "title": "Open in ATSPrep Studio",
+  "description": "Make a link that opens this resume in ATSPrep Studio, the free editor, so the user can fix it, pick a template and download a PDF. The text travels in the link's #fragment, which is never sent to a server.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "resume_text": {
+     "type": "string",
+     "maxLength": 30000,
+     "description": "The whole resume as plain text, one heading, role or bullet per line."
+    }
+   },
+   "required": [
+    "resume_text"
+   ]
+  },
+  "annotations": {
+   "title": "Open in ATSPrep Studio",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "list_templates",
+  "title": "List resume templates",
+  "description": "List ATSPrep's resume designs, each with a link that opens Studio in that design, and the example resumes by role, each with a link that opens it in Studio and a preview image.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "title": "List resume templates",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "fetch_job_post",
+  "title": "Fetch a job post",
+  "description": "Read a public job posting from its link and return the title, company, location and full description as plain text, ready for match_job, tailor_resume, keyword_scan or interview_questions. Reads links from LinkedIn, Greenhouse, Lever, Ashby, SmartRecruiters, Workday. Some postings block reading; then ask the user to paste the text.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "url": {
+     "type": "string",
+     "maxLength": 2000,
+     "format": "uri",
+     "description": "The job posting's public link (https)."
+    }
+   },
+   "required": [
+    "url"
+   ]
+  },
+  "annotations": {
+   "title": "Fetch a job post",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "keyword_scan",
+  "title": "Rank a job post's keywords",
+  "description": "List the skills, tools and requirements a job posting asks for, ranked by how hard it leans on each (repetition, position, required or preferred headings), with the high-priority ones flagged. Use match_job to see which a resume already shows. Posting 120–20,000 characters. Rules version 2026-10-18.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "job_description": {
+     "type": "string",
+     "minLength": 120,
+     "maxLength": 20000,
+     "description": "The full job posting as plain text, including its requirements (120–20,000 characters). For a link, call fetch_job_post first."
+    }
+   },
+   "required": [
+    "job_description"
+   ]
+  },
+  "annotations": {
+   "title": "Rank a job post's keywords",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "tailor_resume",
+  "title": "Tailor a resume to a job",
+  "description": "Tailor a resume to a job posting: the posting's keywords the resume is missing (from match_job's rules) and suggested rewrites of the user's own summary and bullets that bring in the posting's terms only where the existing line already supports them. Each suggestion lists the posting terms it borrowed and confirm_with_user lists terms to ask about, never to add unasked. Part of the answer is drafted by an AI model (Llama 3.3 70B on Cloudflare Workers AI) behind ATSPrep's guard, which drops any figure, name or tool the user's text doesn't contain. If the AI part is unavailable, the rule-based part still comes back and ai.message says why.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "resume_text": {
+     "type": "string",
+     "maxLength": 30000,
+     "description": "The whole resume as plain text, one heading, role or bullet per line."
+    },
+    "job_description": {
+     "type": "string",
+     "minLength": 120,
+     "maxLength": 20000,
+     "description": "The full job posting as plain text, including its requirements (120–20,000 characters). For a link, call fetch_job_post first."
+    }
+   },
+   "required": [
+    "resume_text",
+    "job_description"
+   ]
+  },
+  "annotations": {
+   "title": "Tailor a resume to a job",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "improve_bullet",
+  "title": "Improve a resume bullet",
+  "description": "Check one resume bullet with the fixed rules (score, verdict, fixes) and suggest up to three stronger rewrites that keep every fact as given. Where a number would help, the rewrite leaves a slot such as [X%] for the user to fill. Part of the answer is drafted by an AI model (Llama 3.3 70B on Cloudflare Workers AI) behind ATSPrep's guard, which drops any figure, name or tool the user's text doesn't contain. If the AI part is unavailable, the rule-based part still comes back and ai.message says why.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "bullet": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 600,
+     "description": "One resume bullet."
+    },
+    "role": {
+     "description": "Optional. The job title this bullet sits under.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "company": {
+     "description": "Optional. The employer this bullet sits under.",
+     "type": "string",
+     "maxLength": 200
+    }
+   },
+   "required": [
+    "bullet"
+   ]
+  },
+  "annotations": {
+   "title": "Improve a resume bullet",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "write_summary",
+  "title": "Write a resume summary",
+  "description": "Draft professional summaries from a resume: rule-based drafts built from its title, skills and the bullets that carry a figure, plus AI drafts that use only facts in the resume. Part of the answer is drafted by an AI model (Llama 3.3 70B on Cloudflare Workers AI) behind ATSPrep's guard, which drops any figure, name or tool the user's text doesn't contain. If the AI part is unavailable, the rule-based part still comes back and ai.message says why.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "resume_text": {
+     "type": "string",
+     "maxLength": 30000,
+     "description": "The whole resume as plain text, one heading, role or bullet per line."
+    },
+    "target_title": {
+     "description": "Optional. The job title the summary should aim at.",
+     "type": "string",
+     "maxLength": 200
+    }
+   },
+   "required": [
+    "resume_text"
+   ]
+  },
+  "annotations": {
+   "title": "Write a resume summary",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "action_verbs",
+  "title": "Find stronger action verbs",
+  "description": "Suggest resume action verbs. Pass a weak opener (\"responsible for\", \"helped\") for direct swaps and why they read weak, or the work in plain words (\"trained new staff\", \"cut costs\") for the matching verb groups with an example bullet. Leave query empty for every group.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "Optional. A weak verb or phrase, or the kind of work in plain words.",
+     "type": "string",
+     "maxLength": 200
+    }
+   }
+  },
+  "annotations": {
+   "title": "Find stronger action verbs",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "generate_linkedin_headline",
+  "title": "Write LinkedIn headlines",
+  "description": "Write LinkedIn headline options from the user's answers, each in a proven pattern (title and focus, title and result, title and who you help…), with its length and roughly what shows in search before the cut. Uses only the answers given.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "role": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 200,
+     "description": "The job title the user wants to be found for."
+    },
+    "years": {
+     "description": "Optional. Years of experience, as a number.",
+     "type": "string",
+     "maxLength": 20
+    },
+    "focus": {
+     "description": "Optional. Their specialty or industry, e.g. \"B2B SaaS onboarding\".",
+     "type": "string",
+     "maxLength": 200
+    },
+    "skills": {
+     "description": "Optional. Main skills, comma separated.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "results": {
+     "description": "Optional. One or two real results, one per line, with the numbers the user gave.",
+     "type": "string",
+     "maxLength": 600
+    },
+    "audience": {
+     "description": "Optional. Who they help, e.g. \"early-stage startups\".",
+     "type": "string",
+     "maxLength": 200
+    },
+    "next": {
+     "description": "Optional. What they want next, e.g. \"open to product roles in London\".",
+     "type": "string",
+     "maxLength": 200
+    }
+   },
+   "required": [
+    "role"
+   ]
+  },
+  "annotations": {
+   "title": "Write LinkedIn headlines",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "check_linkedin_headline",
+  "title": "Check a LinkedIn headline",
+  "description": "Check a LinkedIn headline: length against the 220-character limit, what shows in search results before the cut, whether it leads with a searchable job title, and buzzwords or vague claims to replace.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "headline": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 400,
+     "description": "The headline as it reads now."
+    },
+    "role": {
+     "description": "Optional. The job title the user wants to be found for.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "focus": {
+     "description": "Optional. Their specialty or industry.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "skills": {
+     "description": "Optional. Main skills, comma separated.",
+     "type": "string",
+     "maxLength": 200
+    }
+   },
+   "required": [
+    "headline"
+   ]
+  },
+  "annotations": {
+   "title": "Check a LinkedIn headline",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "check_linkedin_about",
+  "title": "Check a LinkedIn About section",
+  "description": "Check a LinkedIn About section: what shows before \"see more\" on a phone and on a computer, whether the opening says who they are, results with numbers, buzzwords, a clear next step, and the 2,600-character limit.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "about": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 6000,
+     "description": "The whole About section."
+    },
+    "role": {
+     "description": "Optional. The job title the user wants to be found for.",
+     "type": "string",
+     "maxLength": 200
+    }
+   },
+   "required": [
+    "about"
+   ]
+  },
+  "annotations": {
+   "title": "Check a LinkedIn About section",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "draft_cover_letter",
+  "title": "Draft a cover letter",
+  "description": "Draft a cover letter from the user's resume and the job posting with fixed rules: name, contact details and up to two results from the resume, the job title and top keywords from the posting. Facts that are missing show as [square-bracket] gaps for the user to fill, never as stand-ins. Returns the letter, the gaps and a checklist.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "resume_text": {
+     "type": "string",
+     "maxLength": 30000,
+     "description": "The whole resume as plain text, one heading, role or bullet per line."
+    },
+    "job_description": {
+     "type": "string",
+     "minLength": 120,
+     "maxLength": 20000,
+     "description": "The full job posting as plain text, including its requirements (120–20,000 characters). For a link, call fetch_job_post first."
+    },
+    "style": {
+     "description": "classic (default), direct, or career-change.",
+     "type": "string",
+     "enum": [
+      "classic",
+      "direct",
+      "career-change"
+     ]
+    },
+    "name": {
+     "description": "Optional. Overrides the name read from the resume.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "email": {
+     "description": "Optional.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "phone": {
+     "description": "Optional.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "current_title": {
+     "description": "Optional. The user's current or last job title.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "company": {
+     "description": "Optional. The company they are applying to.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "role": {
+     "description": "Optional. The job title they are applying for.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "hiring_manager": {
+     "description": "Optional. The hiring manager's name, if known.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "results": {
+     "description": "Optional. One or two real results, one per line.",
+     "type": "string",
+     "maxLength": 600
+    },
+    "why": {
+     "description": "Optional. Why this company, in the user's words.",
+     "type": "string",
+     "maxLength": 600
+    }
+   }
+  },
+  "annotations": {
+   "title": "Draft a cover letter",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "draft_resignation_letter",
+  "title": "Draft a resignation letter",
+  "description": "Draft a short, professional resignation letter and work out the last working day from the notice period. Missing facts show as [square-bracket] gaps. Returns the letter, the last day and a checklist (notice stated, no complaints, length).",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "tone": {
+     "description": "formal (default), warm or short.",
+     "type": "string",
+     "enum": [
+      "formal",
+      "warm",
+      "short"
+     ]
+    },
+    "name": {
+     "description": "Optional. The user's name.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "manager": {
+     "description": "Optional. Their manager's name.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "company": {
+     "description": "Optional.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "role": {
+     "description": "Optional. Their job title.",
+     "type": "string",
+     "maxLength": 200
+    },
+    "notice": {
+     "description": "Notice period: 1w, 2w (default) or 4w. Use notice_days for anything else.",
+     "type": "string",
+     "enum": [
+      "1w",
+      "2w",
+      "4w"
+     ]
+    },
+    "notice_days": {
+     "description": "Optional. A notice period in days, instead of notice.",
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 180
+    },
+    "working_days_only": {
+     "description": "Count notice in working days (Monday to Friday). Default false: calendar days.",
+     "type": "boolean"
+    },
+    "date": {
+     "description": "Optional. The day the letter is handed in, YYYY-MM-DD. Default today (UTC).",
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "reason": {
+     "description": "Optional. A one-line reason; none (default) gives no reason.",
+     "type": "string",
+     "enum": [
+      "none",
+      "new-role",
+      "relocation",
+      "study"
+     ]
+    },
+    "offer_handover": {
+     "description": "Offer to help hand over. Default true.",
+     "type": "boolean"
+    },
+    "thanks": {
+     "description": "Optional. Something specific to thank them for.",
+     "type": "string",
+     "maxLength": 600
+    }
+   }
+  },
+  "annotations": {
+   "title": "Draft a resignation letter",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "interview_questions",
+  "title": "Interview practice questions",
+  "description": "Interview questions to practise, each with what the interviewer is listening for, plus STAR answer tips. With a job_description, questions come from its skills and duties, along with what to research and questions to ask; with resume_text, from the user's own roles. Rule-based.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "job_description": {
+     "description": "Optional. The job posting as plain text.",
+     "type": "string",
+     "maxLength": 20000
+    },
+    "resume_text": {
+     "type": "string",
+     "maxLength": 30000,
+     "description": "The whole resume as plain text, one heading, role or bullet per line."
+    },
+    "kind": {
+     "description": "Optional. One group: posting, resume, about, behavioural, role or closing. Default all.",
+     "type": "string",
+     "enum": [
+      "all",
+      "posting",
+      "resume",
+      "about",
+      "behavioural",
+      "role",
+      "closing"
+     ]
+    },
+    "limit": {
+     "description": "How many questions. Default 12.",
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 40
+    }
+   }
+  },
+  "annotations": {
+   "title": "Interview practice questions",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ },
+ {
+  "name": "review_interview_answer",
+  "title": "Review an interview answer",
+  "description": "Review the user's answer to an interview question: a rating, length and speaking time, STAR coverage for stories, filler words, specific checks, the follow-up an interviewer would likely ask, and a stronger version that keeps to the user's own facts. Part of the answer is drafted by an AI model (Llama 3.3 70B on Cloudflare Workers AI) behind ATSPrep's guard, which drops any figure, name or tool the user's text doesn't contain. If the AI part is unavailable, the rule-based part still comes back and ai.message says why.",
+  "inputSchema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+    "question": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 400,
+     "description": "The interview question."
+    },
+    "answer": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 4000,
+     "description": "The user's answer, as they would say it."
+    },
+    "kind": {
+     "description": "story (default: a past example, scored on STAR), pitch (tell me about yourself), plan (how would you…), number (salary or a figure) or close (questions for them).",
+     "type": "string",
+     "enum": [
+      "story",
+      "pitch",
+      "plan",
+      "number",
+      "close"
+     ]
+    },
+    "resume_text": {
+     "description": "Optional. The resume, so the stronger answer can use real facts from it.",
+     "type": "string",
+     "maxLength": 30000
+    }
+   },
+   "required": [
+    "question",
+    "answer"
+   ]
+  },
+  "annotations": {
+   "title": "Review an interview answer",
+   "readOnlyHint": true,
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false
+  },
+  "execution": {
+   "taskSupport": "forbidden"
+  }
+ }
+]

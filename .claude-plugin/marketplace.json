@@ -1,0 +1,26 @@
+{
+  "name": "atsprep-skills",
+  "owner": {
+    "name": "ATSPrep",
+    "email": "support@atsprep.com"
+  },
+  "metadata": {
+    "description": "Free resume and job-search skills that use ATSPrep's tools",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "atsprep",
+      "description": "Check a resume for ATS, tailor it to a job, prep for interviews, draft cover letters and polish a LinkedIn profile with ATSPrep's free tools.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/resume-ats-check",
+        "./skills/tailor-resume-to-job",
+        "./skills/interview-prep",
+        "./skills/cover-letter",
+        "./skills/linkedin-profile-polish"
+      ]
+    }
+  ]
+}

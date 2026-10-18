@@ -52,7 +52,7 @@ No arguments.
 
 ## fetch_job_post
 
-Read a public job posting from its link and return the title, company, location and full description as plain text, ready for match_job, tailor_resume, keyword_scan or interview_questions. Reads links from LinkedIn, Greenhouse, Lever, Ashby, SmartRecruiters, Workday. Some postings block reading; then ask the user to paste the text.
+Read a public job posting from its link and return the title, company, location and full description as plain text, ready for match_job, tailor_resume, keyword_scan or interview_questions. Reads LinkedIn, Greenhouse, Lever, Ashby, SmartRecruiters, Workable, Workday and most company careers pages. Some sites block reading; then ask the user to paste the text.
 
 | Argument | Type | Required | Notes |
 | --- | --- | --- | --- |

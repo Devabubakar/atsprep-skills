@@ -10,7 +10,7 @@ Five free, open-source [Agent Skills](https://agentskills.io) that teach Claude,
 | [`cover-letter`](skills/cover-letter/SKILL.md) | Drafts a cover letter (or resignation letter) from your real experience and fills the gaps with you. |
 | [`linkedin-profile-polish`](skills/linkedin-profile-polish/SKILL.md) | Checks your LinkedIn headline and About section and writes headline options. |
 
-Each skill calls the free ATSPrep MCP server at `https://atsprep.com/mcp`. There's no account and no API key. If your agent has the ATSPrep MCP server connected, the skill uses its tools directly; if not, it runs the bundled `scripts/atsprep.mjs` (Node 18+, no dependencies), or plain HTTPS.
+Each skill calls the free ATSPrep MCP server at `https://atsprep.com/mcp` (18 tools: ATS check, job match, keyword scan, bullet and LinkedIn checks, tailoring, letters and interview practice). There's no account and no API key. If your agent has the ATSPrep MCP server connected, the skill uses its tools directly; if not, it runs the bundled `scripts/atsprep.mjs` (Node 18+, no dependencies), or plain HTTPS.
 
 ## Install
 
@@ -66,7 +66,7 @@ codex mcp add atsprep --url https://atsprep.com/mcp                # Codex
 
 ## What leaves your machine
 
-Most ATSPrep tools are rule-based. Four (`tailor_resume`, `improve_bullet`, `write_summary`, `review_interview_answer`) also send the text they rewrite to Llama 3.3 70B on Cloudflare Workers AI, which doesn't train on it. ATSPrep logs only the tool name, whether it worked and how long it took, never your text. Details: [references/privacy.md](shared/privacy.md) and [atsprep.com/privacy](https://atsprep.com/privacy#mcp).
+Most ATSPrep tools are rule-based, so the same text always gets the same answer. Four (`tailor_resume`, `improve_bullet`, `write_summary`, `review_interview_answer`) also send the text they rewrite to an open language model on Cloudflare Workers AI (Google's Gemma 4, with Meta's Llama 3.3 70B if Gemma is busy), which doesn't train on it. Any line the model returns with a number, name or tool your text doesn't contain is dropped. ATSPrep logs only the tool name, whether it worked and how long it took, never your text. Details: [references/privacy.md](shared/privacy.md) and [atsprep.com/privacy](https://atsprep.com/privacy#mcp).
 
 ## Layout
 

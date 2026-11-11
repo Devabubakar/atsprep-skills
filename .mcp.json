@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "atsprep": {
+      "type": "http",
+      "url": "https://atsprep.com/mcp"
+    }
+  }
+}
